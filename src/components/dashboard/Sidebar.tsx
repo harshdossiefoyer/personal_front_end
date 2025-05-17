@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -37,65 +37,20 @@ interface Project {
   ranking?: number;
 }
 
-interface PaginatedResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Project[];
+interface ProjectResponse {
+  message: string;
+  data: Project;
 }
 
 const Sidebar = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { addProject } = useProjects();
+  const { projects, loading, error, addProject } = useProjects();
   const { token } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Fetch projects directly from API
-  useEffect(() => {
-    const fetchProjects = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch('http://127.0.0.1:8000/api/projects/projects/', {
-          headers: {
-            'Authorization': `Token ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch projects');
-        }
-
-        const data: PaginatedResponse = await response.json();
-        console.log('Sidebar fetched projects:', data);
-
-        if (data.results && Array.isArray(data.results)) {
-          setProjects(data.results);
-        } else {
-          console.error('Unexpected API response format:', data);
-          setProjects([]);
-        }
-      } catch (err) {
-        console.error('Error fetching projects in sidebar:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch projects');
-        setProjects([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, [token]);
-
-  // Debug log to check projects data
-  useEffect(() => {
-    console.log('Current sidebar projects:', projects);
-  }, [projects]);
+  const handleProjectAdded = async (response: ProjectResponse) => {
+    await addProject(response);
+    setDialogOpen(false);
+  };
 
   return (
     <>
@@ -147,7 +102,7 @@ const Sidebar = () => {
               projects.map((project) => (
                 <Link
                   key={`sidebar-project-${project.id}`}
-                  to="/dashboard"
+                  to={`/project/${project.id}`}
                   className="flex items-center gap-3 p-2.5 rounded-md hover:bg-secondary text-white transition-all duration-200"
                 >
                   <Globe className="h-5 w-5 text-white/80" />
@@ -215,7 +170,7 @@ const Sidebar = () => {
       <AddProjectDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onProjectAdded={addProject}
+        onProjectAdded={handleProjectAdded}
       />
     </>
   );

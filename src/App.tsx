@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/login";
-import ProjectPage from "./pages/ProjectPage";
+import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import { ProjectProvider } from "./context/ProjectContext";
 import { AuthProvider } from "./context/AuthContext";
 import NotFound from "./pages/NotFound";
@@ -27,7 +27,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<Index />} />
-              <Route path="/project/:id" element={<ProjectPage />} />
+              <Route path="/project/:id" element={<ProjectDetailsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
